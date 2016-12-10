@@ -10,7 +10,7 @@
  * 使用；不允许对程序代码以任何形式任何目的的再发布。
  * ============================================================================
  * $Author: liubo&0xJacky $
- * $Id: cls_mysql.php 17217 2016-12-10 15:10:08Z 0xJacky $
+ * $Id: cls_mysqli.php 17217 2016-12-10 15:10:08Z 0xJacky $
 */
 
 if (!defined('IN_ECS'))
@@ -308,42 +308,42 @@ class cls_mysqli
 
     function affected_rows()
     {
-        return mysql_affected_rows($this->link_id);
+        return mysqli_affected_rows($this->link_id);
     }
 
     function error()
     {
-        return mysql_error($this->link_id);
+        return mysqli_error($this->link_id);
     }
 
     function errno()
     {
-        return mysql_errno($this->link_id);
+        return mysqli_errno($this->link_id);
     }
 
     function result($query, $row)
     {
-        return @mysql_result($query, $row);
+        return @mysqli_result($query, $row);
     }
 
     function num_rows($query)
     {
-        return mysql_num_rows($query);
+        return mysqli_num_rows($query);
     }
 
     function num_fields($query)
     {
-        return mysql_num_fields($query);
+        return mysqli_num_fields($query);
     }
 
     function free_result($query)
     {
-        return mysql_free_result($query);
+        return mysqli_free_result($query);
     }
 
     function insert_id()
     {
-        return mysql_insert_id($this->link_id);
+        return mysqli_insert_id($this->link_id);
     }
 
     function fetchRow($query)
@@ -394,7 +394,7 @@ class cls_mysqli
 
     function close()
     {
-        return mysql_close($this->link_id);
+        return mysqli_close($this->link_id);
     }
 
     function ErrorMsg($message = '', $sql = '')
