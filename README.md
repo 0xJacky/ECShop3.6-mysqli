@@ -1,5 +1,5 @@
 # ECShop3.0_mysqli
-This a mysqli driver for ECShop3.0, added support for PHP mysqli extension，compatibled with PHP 7.x and MySQL5.6+
+This a mysqli driver for ECShop3.0, added support for PHP mysqli extension, compatibled with PHP 7.x and MySQL5.6+
 
 此 mysqli 类库在原 ECShop 3.0 的 mysql 类库上修改而成，已支持 PHP mysqli 拓展，适配 PHP7.x 及 MySQL5.6+
 
