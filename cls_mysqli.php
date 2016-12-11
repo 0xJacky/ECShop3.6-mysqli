@@ -384,7 +384,9 @@ class cls_mysqli
               return mysqli_real_escape_string($con, $unescaped_string);
             }
             else
+            {
               return mysql_real_escape_string($unescaped_string);
+            }
         }
         else
         {
