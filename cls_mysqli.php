@@ -1,7 +1,7 @@
 <?php
 
 /**
- * ECSHOP MYSQL 公用类库
+ * ECSHOP MYSQLi 公用类库
  * ============================================================================
  * * 版权所有 2005-2012 上海商派网络科技有限公司，并保留所有权利。
  * 网站地址: http://www.ecshop.com；
@@ -379,14 +379,13 @@ class cls_mysqli
         {
             if (PHP_VERSION >= '7.0') {
               require(ROOT_PATH . 'data/config.php');
-              $con = mysqli_connect($db_address, $db_user, $db_pass, $db_name, $db_port);
-              $db_host = $db_user = $db_pass = $db_name = $db_address = $db_port = NULL; //销毁变量
+              $db = explode(":", $db_host, 2);
+              $con = mysqli_connect($db[0], $db_user, $db_pass, $db_name, $db[1]);
+              $db = $db_host = $db_user = $db_pass = $db_name = NULL; //销毁变量
               return mysqli_real_escape_string($con, $unescaped_string);
             }
             else
-            {
               return mysql_real_escape_string($unescaped_string);
-            }
         }
         else
         {
