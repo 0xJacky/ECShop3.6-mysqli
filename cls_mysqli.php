@@ -275,8 +275,8 @@ class cls_mysqli
         {
             $this->error_message[]['message'] = 'MySQL Query Error';
             $this->error_message[]['sql'] = $sql;
-            $this->error_message[]['error'] = mysql_error($this->link_id);
-            $this->error_message[]['errno'] = mysql_errno($this->link_id);
+            $this->error_message[]['error'] = mysqli_error($this->link_id);
+            $this->error_message[]['errno'] = mysqli_errno($this->link_id);
 
             $this->ErrorMsg();
 
