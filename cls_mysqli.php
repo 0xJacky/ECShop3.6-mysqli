@@ -47,10 +47,10 @@ class cls_mysqli
 
     function __construct($dbhost, $dbuser, $dbpw, $dbname = '', $charset = 'gbk', $pconnect = 0, $quiet = 0)
     {
-        $this->cls_mysql($dbhost, $dbuser, $dbpw, $dbname, $charset, $pconnect, $quiet);
+        $this->cls_mysqli($dbhost, $dbuser, $dbpw, $dbname, $charset, $pconnect, $quiet);
     }
 
-    function cls_mysql($dbhost, $dbuser, $dbpw, $dbname = '', $charset = 'gbk', $pconnect = 0, $quiet = 0)
+    function cls_mysqli($dbhost, $dbuser, $dbpw, $dbname = '', $charset = 'gbk', $pconnect = 0, $quiet = 0)
     {
         if (defined('EC_CHARSET'))
         {
@@ -94,19 +94,8 @@ class cls_mysqli
             }
         }
         else
-
         {
-
-            if (PHP_VERSION >= '7.0')
-            {
-              $this->link_id = @mysqli_connect($dbhost, $dbuser, $dbpw);
-            }
-            if (PHP_VERSION <= '4.2')
-            {
-                $this->link_id = @mysql_connect($dbhost, $dbuser, $dbpw);
-
-                mt_srand((double)microtime() * 1000000); // 对 PHP 4.2 以下的版本进行随机数函数的初始化工作
-            }
+            $link_id = $this->link_id = @mysqli_connect($dbhost, $dbuser, $dbpw);
             if (!$this->link_id)
             {
                 if (!$quiet)
@@ -121,18 +110,14 @@ class cls_mysqli
         $this->dbhash  = md5($this->root_path . $dbhost . $dbuser . $dbpw . $dbname);
         $this->version = mysqli_get_server_info($this->link_id);
 
-        /* 如果mysql 版本是 4.1+ 以上，需要对字符集进行初始化 */
-        if ($this->version > '4.1')
+
+        if ($charset != 'latin1')
         {
-            if ($charset != 'latin1')
-            {
-                mysqli_query($this->link_id, "SET character_set_connection=$charset, character_set_results=$charset, character_set_client=binary");
-            }
-            if ($this->version > '5.0.1')
-            {
-                mysqli_query($this->link_id, "SET sql_mode=''");
-            }
+            mysqli_query($this->link_id, "SET character_set_connection=$charset, character_set_results=$charset, character_set_client=binary");
         }
+
+        mysqli_query($this->link_id, "SET sql_mode=''");
+
 
         $sqlcache_config_file = $this->root_path . $this->cache_data_dir . 'sqlcache_config_file_' . $this->dbhash . '.php';
 
@@ -162,7 +147,7 @@ class cls_mysqli
 
             if ($this->platform == 'OTHER' &&
                 ($dbhost != '.' && strtolower($dbhost) != 'localhost:3306' && $dbhost != '127.0.0.1:3306') ||
-                (PHP_VERSION >= '5.1' && date_default_timezone_get() == 'UTC'))
+                (date_default_timezone_get() == 'UTC'))
             {
                 $result = mysqli_query("SELECT UNIX_TIMESTAMP() AS timeline, UNIX_TIMESTAMP('" . date('Y-m-d H:i:s', $this->starttime) . "') AS timezone", $this->link_id);
                 $row    = mysqli_fetch_assoc($result);
@@ -172,7 +157,7 @@ class cls_mysqli
                     $this->timeline = $this->starttime - $row['timeline'];
                 }
 
-                if (PHP_VERSION >= '5.1' && date_default_timezone_get() == 'UTC')
+                if (date_default_timezone_get() == 'UTC')
                 {
                     $this->timezone = $this->starttime - $row['timezone'];
                 }
@@ -217,17 +202,13 @@ class cls_mysqli
 
     function set_mysql_charset($charset)
     {
-        /* 如果mysql 版本是 4.1+ 以上，需要对字符集进行初始化 */
-        if ($this->version > '4.1')
+        if (in_array(strtolower($charset), array('gbk', 'big5', 'utf-8', 'utf8')))
         {
-            if (in_array(strtolower($charset), array('gbk', 'big5', 'utf-8', 'utf8')))
-            {
-                $charset = str_replace('-', '', $charset);
-            }
-            if ($charset != 'latin1')
-            {
-                mysqli_query("SET character_set_connection=$charset, character_set_results=$charset, character_set_client=binary", $this->link_id);
-            }
+            $charset = str_replace('-', '', $charset);
+        }
+        if ($charset != 'latin1')
+        {
+            mysqli_query("SET character_set_connection=$charset, character_set_results=$charset, character_set_client=binary", $this->link_id);
         }
     }
 
@@ -257,18 +238,13 @@ class cls_mysqli
         }
         if ($this->queryTime == '')
         {
-            if (PHP_VERSION >= '5.0.0')
-            {
-                $this->queryTime = microtime(true);
-            }
-            else
-            {
-                $this->queryTime = microtime();
-            }
+
+            $this->queryTime = microtime(true);
+
         }
 
         /* 当当前的时间大于类初始化时间的时候，自动执行 ping 这个自动重新连接操作 */
-        if (PHP_VERSION >= '4.3' && time() > $this->starttime + 1)
+        if (time() > $this->starttime + 1)
         {
             mysqli_ping($this->link_id);
         }
@@ -290,19 +266,8 @@ class cls_mysqli
             $logfilename = $this->root_path . DATA_DIR . '/mysqli_query_' . $this->dbhash . '_' . date('Y_m_d') . '.log';
             $str = $sql . "\n\n";
 
-            if (PHP_VERSION >= '5.0')
-            {
-                file_put_contents($logfilename, $str, FILE_APPEND);
-            }
-            else
-            {
-                $fp = @fopen($logfilename, 'ab+');
-                if ($fp)
-                {
-                    fwrite($fp, $str);
-                    fclose($fp);
-                }
-            }
+            file_put_contents($logfilename, $str, FILE_APPEND);
+
         }
 
         return $query;
@@ -365,34 +330,16 @@ class cls_mysqli
 
     function ping()
     {
-        if (PHP_VERSION >= '4.3')
-        {
-            return mysqli_ping($this->link_id);
-        }
-        else
-        {
-            return false;
-        }
+        return mysqli_ping($this->link_id);
     }
 
     static function escape_string($unescaped_string)
     {
-        if (PHP_VERSION >= '4.3')
-        {
-            if (PHP_VERSION >= '7.0') {
-              require(ROOT_PATH . 'data/config.php');
-              $db = explode(":", $db_host, 2);
-              $con = mysqli_connect($db[0], $db_user, $db_pass, $db_name, $db[1]);
-              $db = $db_host = $db_user = $db_pass = $db_name = NULL; //销毁变量
-              return mysqli_real_escape_string($con, $unescaped_string);
-            }
-            else
-              return mysql_real_escape_string($unescaped_string);
-        }
-        else
-        {
-            return mysql_escape_string($unescaped_string);
-        }
+        require(ROOT_PATH . 'data/config.php');
+        $db = explode(":", $db_host, 2);
+        $con = mysqli_connect($db[0], $db_user, $db_pass, $db_name, $db[1]);
+        $db = $db_host = $db_user = $db_pass = $db_name = NULL; //销毁变量
+        return mysqli_real_escape_string($con, $unescaped_string);
     }
 
     function close()
@@ -404,14 +351,12 @@ class cls_mysqli
     {
         if ($message)
         {
-            echo "<b>ECSHOP info</b>: $message\n\n<br /><br />";
-            //print('<a href="http://faq.comsenz.com/?type=mysql&dberrno=2003&dberror=Can%27t%20connect%20to%20MySQL%20server%20on" target="_blank">http://faq.comsenz.com/</a>');
+            echo "<strong>ECSHOP info: </strong>$message";
         }
         else
         {
-            echo "<b>MySQL server error report:";
+            echo "<strong>MySQL server error report:</strong>";
             print_r($this->error_message);
-            //echo "<br /><br /><a href='http://faq.comsenz.com/?type=mysql&dberrno=" . $this->error_message[3]['errno'] . "&dberror=" . urlencode($this->error_message[2]['error']) . "' target='_blank'>http://faq.comsenz.com/</a>";
         }
 
         exit;
@@ -722,52 +667,12 @@ class cls_mysqli
         }
         else
         {
-            if ($this->version() >= '4.1')
+            if (!empty($fields))
             {
-                if (!empty($fields))
+                $sql = 'INSERT INTO ' . $table . ' (' . implode(', ', $fields) . ') VALUES (' . implode(', ', $values) . ')';
+                if (!empty($sets))
                 {
-                    $sql = 'INSERT INTO ' . $table . ' (' . implode(', ', $fields) . ') VALUES (' . implode(', ', $values) . ')';
-                    if (!empty($sets))
-                    {
-                        $sql .=  'ON DUPLICATE KEY UPDATE ' . implode(', ', $sets);
-                    }
-                }
-            }
-            else
-            {
-                if (empty($where))
-                {
-                    $where = array();
-                    foreach ($primary_keys AS $value)
-                    {
-                        if (is_numeric($value))
-                        {
-                            $where[] = $value . ' = ' . $field_values[$value];
-                        }
-                        else
-                        {
-                            $where[] = $value . " = '" . $field_values[$value] . "'";
-                        }
-                    }
-                    $where = implode(' AND ', $where);
-                }
-
-                if ($where && (!empty($sets) || !empty($fields)))
-                {
-                    if (intval($this->getOne("SELECT COUNT(*) FROM $table WHERE $where")) > 0)
-                    {
-                        if (!empty($sets))
-                        {
-                            $sql = 'UPDATE ' . $table . ' SET ' . implode(', ', $sets) . ' WHERE ' . $where;
-                        }
-                    }
-                    else
-                    {
-                        if (!empty($fields))
-                        {
-                            $sql = 'REPLACE INTO ' . $table . ' (' . implode(', ', $fields) . ') VALUES (' . implode(', ', $values) . ')';
-                        }
-                    }
+                    $sql .=  'ON DUPLICATE KEY UPDATE ' . implode(', ', $sets);
                 }
             }
         }
