@@ -1,4 +1,4 @@
-# ECShop3.0 MySQLi CLS
+# ECShop3.6 MySQLi CLS
 This a MySQLi Common Class Library for ECShop3.x, added support for PHP mysqli extension, compatibled with PHP 7.x and MySQL5.6+
 
 这是一个 ECShop 3.x 的 MySQLi 公用类库，已支持 PHP MySQLi 拓展，适配 PHP7.x 及 MySQL5.6+
