@@ -45,6 +45,8 @@ class cls_mysqli
 
     var $mysql_disable_cache_tables = array(); // 不允许被缓存的表，遇到将不会进行缓存
 
+    private static $static_link = '';
+
     function __construct($dbhost, $dbuser, $dbpw, $dbname = '', $charset = 'gbk', $pconnect = 0, $quiet = 0)
     {
         $this->cls_mysqli($dbhost, $dbuser, $dbpw, $dbname, $charset, $pconnect, $quiet);
@@ -83,7 +85,8 @@ class cls_mysqli
     {
         if ($pconnect)
         {
-            if (!($this->link_id = mysqli_pconnect($dbhost, $dbuser, $dbpw)))
+            $this->link_id = self::$static_link = mysqli_pconnect($dbhost, $dbuser, $dbpw);
+            if (!$this->link_id)
             {
                 if (!$quiet)
                 {
@@ -95,7 +98,7 @@ class cls_mysqli
         }
         else
         {
-            $link_id = $this->link_id = @mysqli_connect($dbhost, $dbuser, $dbpw);
+            $this->link_id = self::$static_link = @mysqli_connect($dbhost, $dbuser, $dbpw);
             if (!$this->link_id)
             {
                 if (!$quiet)
@@ -335,11 +338,7 @@ class cls_mysqli
 
     static function escape_string($unescaped_string)
     {
-        require(ROOT_PATH . 'data/config.php');
-        $db = explode(":", $db_host, 2);
-        $con = mysqli_connect($db[0], $db_user, $db_pass, $db_name, $db[1]);
-        $db = $db_host = $db_user = $db_pass = $db_name = NULL; //销毁变量
-        return mysqli_real_escape_string($con, $unescaped_string);
+        return mysqli_real_escape_string(self::$static_link, $unescaped_string);
     }
 
     function close()
