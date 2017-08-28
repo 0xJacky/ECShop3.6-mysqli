@@ -8,7 +8,7 @@ This a MySQLi Common Class Library for ECShop3.x, adds support for PHP mysqli ex
 PS: 为了提升性能，已将原版 MySQL 类库中有判断 PHP / MySQL 版本的相关代码删除
 
 ## Usage 用法
-1. Please put `cls\_mysqli.php` to `includes/ `.
-1. 请将 `cls\_mysqli.php` 放入到 `includes/` 下。
-2. Search and replace `cls\_mysql` to `cls\_mysqli` in all files.
-2. 搜索并替换全局的 `cls\_mysql `为 `cls\_mysqli`。
+1. Please put `cls_mysqli.php` to `includes/ `.
+1. 请将 `cls_mysqli.php` 放入到 `includes/` 下。
+2. Search and replace `cls_mysql` to `cls_mysqli` in all files.
+2. 搜索并替换全局的 `cls_mysql `为 `cls_mysqli`。
